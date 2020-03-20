@@ -1,0 +1,108 @@
+Brainstorm
+
+Features
+  Enter current page -> calculate pages/day
+  Possible to log retroactively (batches)
+  New book -> enter title
+  Read multiple books at one time
+    When a book is replaced (id) it is added to a library?
+  Import/Export JSON
+  Add book with ISBN? Use ISBN as internal ID?
+  
+Statistics
+  Book/Monthly/Yearly/Lifetime
+    Total pages
+    Average pages/day
+    Genres (%) (isbn) 
+    
+Platforms
+  CLI
+  Desktop
+  Mobile Application (extremly simple GUI, minimal interaction)
+  
+Run time view
+  Logging pages:
+    1. Add a book to the system
+    2. Day 1, log as page 0
+    3. Day 2, log as page X
+        (system calculates pages for Day 1 as X-0)
+    4. Day 3, log as page Y
+        (system calculates pages for Day 2 as Y-X)
+  
+  
+Ideas of commands for CLI
+  Adding book:
+    add <id> <title> --author <authors> --genre <genres>
+    Ex
+    add B1 "The Name of the Wind" --author "Patrick Rothfuss" --genre "Fantasy"
+    Output: "The Name of the Wind: Added as B1!"
+  List books:
+    list/books
+    Output: 'B1 : "The Name of the Wind"
+             B2 : "Throne of Glass"
+             etc.'
+  Logging book:
+    log <id> <page> <date>
+    Ex 1
+    log B1 327 010220 
+    Output: "B1: Logged!"
+    Ex 2 (today)
+    log B1 123
+    Output: "B1: Logged!" 
+  Checking stats:
+    stats <id> 
+    stats <month>
+    stats <year>
+    stats 
+    // no argument -> shows lifetime
+    Ex
+    stats B1
+    Output: Pages read, Average/Day, Genres, Start/Finish date
+    stats JAN
+    Output: Pages read, Average/Day, (Graph)
+    stats 2019
+    Output: Pages read, Average/Day, (Graph)
+    stats
+    Output: Pages read, Average/Day
+  Checking library:
+    lib/library/shelf
+    Output: List of books
+              Status: NotStarted/Reading/Finished
+              Start/Finish dates
+              Authors
+              Genres
+              Internal ID?? 
+    IMPORTANT
+      Regarding ID vs Internal ID
+      stats <id> would not work if the book was finished/replaced
+  Exporting
+    export <path>
+    Output: "Exported to <path>!"
+  Importing
+    import <path>
+    Output: "Imported from <path>!"
+
+
+================ 12/9 ===================
+
+page modify B1 id=12 author=temp
+page finish B1
+
+book keys
+  status, title, author, genre, isbn, started, finished, log
+
+isbn regex for modify
+uid for books with status "Done"
+
+
+PATH=$PATH:<path>
+
+
+For creating a simple config.json file
+https://loekvandenouweland.com/content/using-json-config-files-in-python.html
+
+
+
+
+
+

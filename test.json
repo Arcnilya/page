@@ -1,0 +1,27 @@
+{
+    "books": {
+        "B3": {
+            "status": "Done",
+            "title": "The Name of the Wind",
+            "started": "110919",
+            "finished": "120919",
+            "log": {
+                "110919": "123",
+                "120919": "126"
+            },
+            "author": "Patrick Rothfuss"
+        },
+        "B1": {
+            "status": "Done",
+            "title": "Legion of Flame",
+            "started": "120919",
+            "finished": "130919",
+            "log": {
+                "120919": "155",
+                "130919": "160"
+            },
+            "author": "Anthony Ryan",
+            "isbn": "123"
+        }
+    }
+}
