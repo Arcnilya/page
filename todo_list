@@ -1,0 +1,4 @@
+- Restructure the library
+  - Add internal id
+  - Move current id to keys
+- Function: help command listing available commands
