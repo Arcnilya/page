@@ -1,4 +1,4 @@
 - Restructure the library
-  - Add internal id
+  - Add internal id (ISBN!)
   - Move current id to keys
 - Function: help command listing available commands
