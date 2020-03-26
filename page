@@ -37,23 +37,26 @@ def write_json(library):
 # ========== Functions ==========
 def add_book(args, library):
 	if DEBUG_MODE:
-		print("add_book({})".format(args)) # args[id, title]
+		print("add_book({})".format(args)) # args[id, isbn]
 
 	if len(args) < 2:
-		exit(ERR_ARGLEN_MSG + " id title")
+		exit(ERR_ARGLEN_MSG + " <id> <isbn>")
 
-	if args[0] in library['books'].keys():
-		exit(ERR_ID_NOT_404_MSG)
+	for book in library['books']:
+		if args[1] == book['isbn']:
+			exit(ERR_ID_NOT_404_MSG)
 	
 	# Todo: change json structure, use internal id
 	# and args[0] in book['id'] 
 	book = {}
+	book['id'] = args[0]
+	book['isbn'] = args[1]
 	book['status'] = "New"
-	book['title'] = args[1]
+	book['title'] = "title" # fetch with api
 	book['started'] = None
 	book['finished'] = None
 	book['log'] = {}
-	library['books'][args[0]] = book
+	library['books'].append(book)
 	
 	return library
 
@@ -62,13 +65,12 @@ def remove_book(args, library):
 		print("remove_book({})".format(args)) # args[id]
 
 	if len(args) < 1:
-		exit(ERR_ARGLEN_MSG + " id")
+		exit(ERR_ARGLEN_MSG + " <id>")
 
-	if args[0] in library['books'].keys():
-		library['books'].pop(args[0], None)
-	else:
-		print(ERR_ID_404_MSG)
-	
+	for book in library['books']:
+		if args[0] == book['id']:
+			library['books'].remove(book)
+
 	return library
 
 def list_books(args, library):
@@ -76,8 +78,8 @@ def list_books(args, library):
 		print("list_books({})".format(args)) # args[None]
 
 	print("ID   Title")
-	for key in library['books']:
-		print("{}   {}".format(key, library['books'][key]['title']))
+	for book in library['books']:
+		print("{}   {}".format(book['id'], book['title']))
 
 	return library
  
@@ -86,23 +88,25 @@ def log_book(args, library):
 		print("log_book({})".format(args)) # args[id, page, date]
 
 	if len(args) < 2:
-		exit(ERR_ARGLEN_MSG + " id page (date)")
+		exit(ERR_ARGLEN_MSG + " <id> <page> (<date>)")
   
 	date = CURRENT_DATE
 	if len(args) > 2: # if date provided, Todo: check format
 		date = args[2]
 
-	if args[0] not in library['books'].keys():
-		exit(ERR_ID_404_MSG)
-	elif date in library['books'][args[0]]['log'].keys():
-		exit(ERR_LOG_TAKEN_MSG)
-		# Todo: User override? Promt Y/N
+	for book in library['books']:
+		if args[0] == book['id']:
+			if date in book['log'].keys():
+				exit(ERR_LOG_TAKEN_MSG)
+				# Todo: add override?
+			else:
+				if not book['log']:	# first time log
+					book['started'] = date
+				book['status'] = "Reading"
+				book['log'][date] = int(args[1])
+			return library	
+	exit(ERR_ID_404_MSG)
 
-	if not bool(library['books'][args[0]]['log']): # first time log
-		library['books'][args[0]]['started'] = date
-	library['books'][args[0]]['status'] = "Reading"
-	library['books'][args[0]]['log'][date] = args[1]
-	
 	return library 
 
 def finish_book(args, library):
@@ -110,41 +114,44 @@ def finish_book(args, library):
 		print("finish_book({})".format(args)) # args[id]
 
 	if len(args) < 1:
-		exit(ERR_ARGLEN_MSG + " id")
+		exit(ERR_ARGLEN_MSG + " <id>")
 
-	if args[0] not in library['books'].keys():
-		exit(ERR_ID_404_MSG)
-	library['books'][args[0]]['finished'] = CURRENT_DATE 
-	library['books'][args[0]]['status'] = "Done" 
+	for book in library['books']:
+		if args[0] == book['id']:
+			book['finished'] = CURRENT_DATE
+			book['status'] = "Done"
+			return library
+	exit(ERR_ID_404_MSG)
 	
 	return library
 
+def id_exists(book_id, library):
+	for book in library['books']:
+		if book_id == book['id']:
+			return True
+	return False
+
+# Test this method
 def modify_book(args, library):
 	if DEBUG_MODE:
 		print("modify_book({})".format(args)) # args[id, key=value ...]
    
 	if len(args) < 2:
-		exit(ERR_ARGLEN_MSG + " id key=value (key=value ...)")
+		exit(ERR_ARGLEN_MSG + " <id> <key>=<value> (<key>=<value> ...)")
 
-	if args[0] not in library['books'].keys():
-		exit(ERR_ID_404_MSG)
-	# Todo: Block changes to the log attribute?
-	# Todo: Regex for ISBN?
-	book_id = args[0]
-	for pair in args[1:]:
-		key = pair.split('=')[0]
-		value = pair.split('=')[1]
-		if key == 'id':
-			if value in library['books'].keys():
-				exit(ERR_ID_NOT_404_MSG)
-			else:
-				library['books'][value] = library['books'][book_id]
-				library = remove_book(args, library)
-				book_id = value
-		else:
-			library['books'][book_id][key] = value
-	
-	return library  
+	for book in library['books']:
+		if args[0] == book['id']:
+			for pair in args[1:]:
+				key = str(pair.split('=')[0])
+				value = str(pair.split('=')[1])
+				if key == 'id':
+					if id_exists(value, library):
+						exit(ERR_ID_NOT_404_MSG)
+					else:
+						book['id'] = value
+				else:
+					book[key] = value
+	return library
 
 def info_book(args, library):
 	if DEBUG_MODE:
@@ -153,17 +160,21 @@ def info_book(args, library):
 	if len(args) < 1:
 		exit(ERR_ARGLEN_MSG + " id")
 
-	if args[0] not in library['books'].keys():
-		exit(ERR_ID_404_MSG)
-	print("Book attributes for {}".format(args[0]))
-	for key in library['books'][args[0]].keys():
-		if key != 'log':
-			print("  {}: {}".format(key, library['books'][args[0]][key]))
-	print("Reading log for {}".format(args[0]))
-	for date in library['books'][args[0]]['log'].keys():
-		print("  {}: {}".format(date, library['books'][args[0]]['log'][date]))
-	
+	for book in library['books']:
+		if args[0] == book['id']:
+			
+			print("Book attributes for {}".format(args[0]))
+			for key in book.keys():
+				if key != 'log':
+					print("  {}: {}".format(key, book[key]))
+			
+			print("Reading log for {}".format(args[0]))
+			for date in book['log'].keys():
+				print("  {}: {}".format(date, books['log'][date]))
+						
+	exit(ERR_ID_404_MSG)
 	return library
+	
    
 def stats(args, library):
 	if DEBUG_MODE:
@@ -171,21 +182,29 @@ def stats(args, library):
   
 	if len(args) == 0:
 		print("Lifetime")
-	elif args[0] in library['books'].keys():
-		print("Book {}".format(args[0]))
-	elif args[0].upper()[:3] in MONTHS:
+		return library
+
+	if args[0].upper()[:3] in MONTHS:
 		print("Month {}".format(args[0].upper()[:3]))
-	elif len(args[0]) == 4 and args[0].isdigit():
+		return library
+
+	if len(args[0]) == 4 and args[0].isdigit():
 		print("Year {}".format(args[0]))
-	else:
-		print("{} is not a valid argument".format(args[0]))
-		print("id || month || year || None")
+		return library
+
+	for book in library['books']:
+		if args[0] == book['id']:
+			print("Book {}".format(args[0]))
+			return library
+	
+	print("{} is not a valid argument".format(args[0]))
+	print("id || month || year || None")
 	
 	return library
 
 def main():
 	library = {}
-	library['books'] = {}
+	library['books'] = []
 
 	commands = {
 		'add': add_book,

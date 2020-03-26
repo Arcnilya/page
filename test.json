@@ -1,3 +1,22 @@
 {
-    "books": {}
+    "books": [
+        {
+            "id": "B2",
+            "isbn": "456",
+            "status": "New",
+            "title": "title",
+            "started": null,
+            "finished": null,
+            "log": {}
+        },
+        {
+            "id": "B3",
+            "isbn": "789",
+            "status": "New",
+            "title": "title",
+            "started": null,
+            "finished": null,
+            "log": {}
+        }
+    ]
 }

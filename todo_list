@@ -1,4 +1,9 @@
-- Restructure the library
-  - Add internal id (ISBN!)
-  - Move current id to keys
+- Restructure the library (done)
+  - Add internal id (done)
+- Sanitize input for date on log
+- Refactoring
+- Function: Fetch title by ISBN
+  - Feature: verify ISBN
+  - Feature: Fallback to manual title
+- Debugging: log function
 - Function: help command listing available commands
