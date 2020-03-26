@@ -20,9 +20,10 @@ MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN",
 INFO_LIBRARY_404_MSG = "Saved library not found, creating new"
 ERR_ID_404_MSG = "Book ID not found"
 ERR_ID_NOT_404_MSG = "Book ID already exists"
-ERR_ARGLEN_MSG = "Too few arguments: {}".format(sys.argv[0])
+ERR_ARGLEN_MSG = "Too few arguments: ./page"
 ERR_NOKEY_MSG = "Command not found"
 ERR_LOG_TAKEN_MSG = "Log already exist for that date"
+ERR_DATE_MSG = "Date must be in format ddmmyy, ex 260320"
 #ERR_NOKEY_MSG = "Command not found: {}".format(sys.argv[1])
 
 # ========== Read/Write ==========
@@ -34,7 +35,22 @@ def write_json(library):
   with open(temp_name, 'w') as f:
     json.dump(library, f, indent=4)
 
-# ========== Functions ==========
+# =========== Utils ==============
+def id_exists(book_id, library):
+	for book in library['books']:
+		if book_id == book['id']:
+			return True
+	return False
+
+def check_date(date):
+	if len(date) == 6:
+		if int(date[:2]) > 0 and int(date[:2]) < 32:
+			if int(date[2:-2]) > 0 and int(date[2:-2]) < 13:
+				return date
+	exit(ERR_DATE_MSG)	
+
+
+# ========== Functions ===========
 def add_book(args, library):
 	if DEBUG_MODE:
 		print("add_book({})".format(args)) # args[id, isbn]
@@ -78,7 +94,8 @@ def list_books(args, library):
 		print("list_books({})".format(args)) # args[None]
 
 	print("ID   Title")
-	for book in library['books']:
+	sorted_books = sorted(library['books'], key=lambda b: b['id'])
+	for book in sorted_books:
 		print("{}   {}".format(book['id'], book['title']))
 
 	return library
@@ -92,7 +109,7 @@ def log_book(args, library):
   
 	date = CURRENT_DATE
 	if len(args) > 2: # if date provided, Todo: check format
-		date = args[2]
+		date = check_date(args[2])
 
 	for book in library['books']:
 		if args[0] == book['id']:
@@ -105,9 +122,8 @@ def log_book(args, library):
 				book['status'] = "Reading"
 				book['log'][date] = int(args[1])
 			return library	
-	exit(ERR_ID_404_MSG)
 
-	return library 
+	exit(ERR_ID_404_MSG)
 
 def finish_book(args, library):
 	if DEBUG_MODE:
@@ -122,14 +138,6 @@ def finish_book(args, library):
 			book['status'] = "Done"
 			return library
 	exit(ERR_ID_404_MSG)
-	
-	return library
-
-def id_exists(book_id, library):
-	for book in library['books']:
-		if book_id == book['id']:
-			return True
-	return False
 
 # Test this method
 def modify_book(args, library):
@@ -170,10 +178,10 @@ def info_book(args, library):
 			
 			print("Reading log for {}".format(args[0]))
 			for date in book['log'].keys():
-				print("  {}: {}".format(date, books['log'][date]))
+				print("  {}: {}".format(date, book['log'][date]))
+			return library
 						
 	exit(ERR_ID_404_MSG)
-	return library
 	
    
 def stats(args, library):

@@ -1,9 +1,9 @@
 - Restructure the library (done)
   - Add internal id (done)
-- Sanitize input for date on log
-- Refactoring
+- Sanitize input for date on log (done)
+- Refactoring (done)
 - Function: Fetch title by ISBN
   - Feature: verify ISBN
   - Feature: Fallback to manual title
-- Debugging: log function
+- Debugging: page log function
 - Function: help command listing available commands
