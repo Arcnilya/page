@@ -2,8 +2,9 @@
   - Add internal id (done)
 - Sanitize input for date on log (done)
 - Refactoring (done)
-- Function: Fetch title by ISBN
-  - Feature: verify ISBN
-  - Feature: Fallback to manual title
+- Function: Fetch meta by ISBN (done)
+  - Feature: verify ISBN (done)
+  - Feature: Fallback to manual title (done)
+    - Testing: Need a valid ISBN for non-existing book
 - Debugging: page log function
 - Function: help command listing available commands

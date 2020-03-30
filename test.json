@@ -1,34 +1,3 @@
 {
-    "books": [
-        {
-            "id": "B2",
-            "isbn": "456",
-            "status": "Reading",
-            "title": "title",
-            "started": "260320",
-            "finished": null,
-            "log": {
-                "260320": 123,
-                "250320": 121
-            }
-        },
-        {
-            "id": "B3",
-            "isbn": "789",
-            "status": "New",
-            "title": "title",
-            "started": null,
-            "finished": null,
-            "log": {}
-        },
-        {
-            "id": "B1",
-            "isbn": "2354665",
-            "status": "New",
-            "title": "title",
-            "started": null,
-            "finished": null,
-            "log": {}
-        }
-    ]
+    "books": []
 }

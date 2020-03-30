@@ -3,7 +3,11 @@ import sys
 import os
 import argparse
 import json
+import re
+import isbnlib
 from datetime import date
+
+# https://pypi.org/project/isbnlib/3.6.1/
 
 today = date.today()
 CURRENT_DATE = "{}{}{}".format(
@@ -20,6 +24,7 @@ MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN",
 INFO_LIBRARY_404_MSG = "Saved library not found, creating new"
 ERR_ID_404_MSG = "Book ID not found"
 ERR_ID_NOT_404_MSG = "Book ID already exists"
+ERR_NOT_404_MSG = "Book already exists"
 ERR_ARGLEN_MSG = "Too few arguments: ./page"
 ERR_NOKEY_MSG = "Command not found"
 ERR_LOG_TAKEN_MSG = "Log already exist for that date"
@@ -49,6 +54,18 @@ def check_date(date):
 				return date
 	exit(ERR_DATE_MSG)	
 
+def verify_isbn(isbn):
+	isbn = isbn.replace("-", "")
+	if len(isbn) == 10:
+		if DEBUG_MODE:
+			print("ISBN10:", isbnlib.is_isbn10(isbn))
+		return isbnlib.is_isbn10(isbn)
+	elif len(isbn) == 13:
+		if DEBUG_MODE:
+			print("ISBN13:", isbnlib.is_isbn13(isbn))
+		return isbnlib.is_isbn13(isbn)
+	else:
+		exit("Not an ISBN")
 
 # ========== Functions ===========
 def add_book(args, library):
@@ -59,16 +76,34 @@ def add_book(args, library):
 		exit(ERR_ARGLEN_MSG + " <id> <isbn>")
 
 	for book in library['books']:
+		if args[0] == book['id']:
+			exit(ERR_NOT_404_MSG + " ID: " + str(args[0]))
 		if args[1] == book['isbn']:
-			exit(ERR_ID_NOT_404_MSG)
-	
-	# Todo: change json structure, use internal id
-	# and args[0] in book['id'] 
+			exit(ERR_NOT_404_MSG + " ISBN: " + str(args[1]))
+
+	book_item = None
+	isbn = args[1]
+	if verify_isbn(isbn):
+		book_item = isbnlib.meta(isbn)
+
 	book = {}
+	if book_item:
+		#print(json.dumps(book_item))
+		book['title'] = book_item['Title']
+		book['authors'] = book_item['Authors']
+		book['publisher'] = book_item['Publisher']
+		book['year'] = book_item['Year']
+		book['language'] = book_item['Language']
+	else:
+		book['title'] = str(input("Title: "))
+		book['authors'] = str(input("Authors: "))
+		book['publisher'] = None
+		book['year'] = None
+		book['language'] = None
+	
 	book['id'] = args[0]
-	book['isbn'] = args[1]
+	book['isbn'] = isbn
 	book['status'] = "New"
-	book['title'] = "title" # fetch with api
 	book['started'] = None
 	book['finished'] = None
 	book['log'] = {}
@@ -173,7 +208,9 @@ def info_book(args, library):
 			
 			print("Book attributes for {}".format(args[0]))
 			for key in book.keys():
-				if key != 'log':
+				if key == 'authors':
+					print("  {}: {}".format(key, ",".join(book[key])))
+				elif key != 'log':
 					print("  {}: {}".format(key, book[key]))
 			
 			print("Reading log for {}".format(args[0]))
