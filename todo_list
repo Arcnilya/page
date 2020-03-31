@@ -6,5 +6,5 @@
   - Feature: verify ISBN (done)
   - Feature: Fallback to manual title (done)
     - Testing: Need a valid ISBN for non-existing book
+- Function: help command listing available commands (done)
 - Debugging: page log function
-- Function: help command listing available commands

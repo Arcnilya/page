@@ -6,6 +6,8 @@ Book page tracker CLI
 
 Usage:
 
+./page help
+
 ./page list
 
 ./page add \<id> \<isbn>

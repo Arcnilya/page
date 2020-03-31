@@ -247,6 +247,31 @@ def stats(args, library):
 	
 	return library
 
+
+def help_print(args, library):
+	print("How to use page")
+	print("Commands:\n")
+	print("  page add <id> <isbn>")
+	print("    Adds a book to the library with provided ID, can find book info with isbn\n")
+	print("  page remove <id>")
+	print("    Removes a book from the library with provided ID\n")
+	print("  page list")
+	print("    Lists all books in the library\n")
+	print("  page log <id> <page_number> (<date>)")
+	print("    Logs the current page of book with provided ID.")
+	print("    Optional to add a date, default is current date\n")
+	print("  page finish <id>")
+	print("    Marks the book with provided ID as finished\n")
+	print("  page info <id>")
+	print("    Prints stored information about the book with provided ID\n")
+	print("  page modify <id> <key>=<value> (<key>=<value> ...)")
+	print("    Modifies the book with provided ID and a key/value pair.")
+	print("    Ex. page modify B1 title='new_title'\n")
+	print("  page stats")
+	print("    (Work in Progress)\n")
+
+	return library
+
 def main():
 	library = {}
 	library['books'] = []
@@ -260,6 +285,7 @@ def main():
 		'modify': modify_book,
 		'info': info_book,
 		'stats': stats,
+		'help': help_print,
 	}
 
 	if len(sys.argv) < 2:
