@@ -7,4 +7,12 @@
   - Feature: Fallback to manual title (done)
     - Testing: Need a valid ISBN for non-existing book
 - Function: help command listing available commands (done)
-- Debugging: page log function
+- Feature: prompt for overwriting log (done)
+- Feature: add, input book manually when no ISBN (done)
+- Feature: finish, optional date parameter
+- Debugging: page modify function
+- Function: stats command
+  - Feature: for book
+  - Feature: for month
+  - Feature: for year
+  - Feature: for all time

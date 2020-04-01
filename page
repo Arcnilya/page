@@ -24,7 +24,7 @@ MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN",
 INFO_LIBRARY_404_MSG = "Saved library not found, creating new"
 ERR_ID_404_MSG = "Book ID not found"
 ERR_ID_NOT_404_MSG = "Book ID already exists"
-ERR_NOT_404_MSG = "Book already exists"
+ERR_NOT_404_MSG = "Book already exists with"
 ERR_ARGLEN_MSG = "Too few arguments: ./page"
 ERR_NOKEY_MSG = "Command not found"
 ERR_LOG_TAKEN_MSG = "Log already exist for that date"
@@ -65,29 +65,35 @@ def verify_isbn(isbn):
 			print("ISBN13:", isbnlib.is_isbn13(isbn))
 		return isbnlib.is_isbn13(isbn)
 	else:
-		exit("Not an ISBN")
+		return False
 
 # ========== Functions ===========
 def add_book(args, library):
 	if DEBUG_MODE:
 		print("add_book({})".format(args)) # args[id, isbn]
 
-	if len(args) < 2:
-		exit(ERR_ARGLEN_MSG + " <id> <isbn>")
+	isbn = ""
+	isbn_provided = False
+	book = {}
+
+	if len(args) < 1:
+		exit(ERR_ARGLEN_MSG + " <id> (<isbn>)")
+
+	if len(args) > 1:
+		isbn_provided = True
 
 	for book in library['books']:
 		if args[0] == book['id']:
 			exit(ERR_NOT_404_MSG + " ID: " + str(args[0]))
-		if args[1] == book['isbn']:
-			exit(ERR_NOT_404_MSG + " ISBN: " + str(args[1]))
+		if isbn_provided:
+			if args[1] == book['isbn']:
+				exit(ERR_NOT_404_MSG + " ISBN: " + str(args[1]))
 
-	book_item = None
-	isbn = args[1]
+	if isbn_provided:
+		isbn = args[1]
+
 	if verify_isbn(isbn):
 		book_item = isbnlib.meta(isbn)
-
-	book = {}
-	if book_item:
 		#print(json.dumps(book_item))
 		book['title'] = book_item['Title']
 		book['authors'] = book_item['Authors']
@@ -95,12 +101,16 @@ def add_book(args, library):
 		book['year'] = book_item['Year']
 		book['language'] = book_item['Language']
 	else:
-		book['title'] = str(input("Title: "))
-		book['authors'] = str(input("Authors: "))
-		book['publisher'] = None
-		book['year'] = None
-		book['language'] = None
-	
+		print("No ISBN found")
+		if str(input("Add book manually? (Y/N) ")).lower() in ["yes", "y"]:
+			book['title'] = str(input("Title: "))
+			book['authors'] = list(str(input("Authors: ")).split(', '))
+			book['publisher'] = str(input("Publisher: "))
+			book['year'] = str(input("Year: "))
+			book['language'] = str(input("Language: "))
+		else:
+			return library
+
 	book['id'] = args[0]
 	book['isbn'] = isbn
 	book['status'] = "New"
@@ -108,7 +118,7 @@ def add_book(args, library):
 	book['finished'] = None
 	book['log'] = {}
 	library['books'].append(book)
-	
+	del book	
 	return library
 
 def remove_book(args, library):
@@ -143,14 +153,17 @@ def log_book(args, library):
 		exit(ERR_ARGLEN_MSG + " <id> <page> (<date>)")
   
 	date = CURRENT_DATE
-	if len(args) > 2: # if date provided, Todo: check format
+	if len(args) > 2: # if date provided
 		date = check_date(args[2])
 
 	for book in library['books']:
 		if args[0] == book['id']:
 			if date in book['log'].keys():
-				exit(ERR_LOG_TAKEN_MSG)
-				# Todo: add override?
+				print(ERR_LOG_TAKEN_MSG)
+				print("{}: {}".format(date, book['log'][date])) 
+				if str(input("Overwrite? (Y/N) ")).lower() in ["yes", "y"]:
+					book['status'] = "Reading"
+					book['log'][date] = int(args[1])
 			else:
 				if not book['log']:	# first time log
 					book['started'] = date
@@ -165,11 +178,15 @@ def finish_book(args, library):
 		print("finish_book({})".format(args)) # args[id]
 
 	if len(args) < 1:
-		exit(ERR_ARGLEN_MSG + " <id>")
+		exit(ERR_ARGLEN_MSG + " <id> (<date>)")
+
+	date = CURRENT_DATE
+	if len(args) > 2: # if date provided
+		date = check_date(args[2])
 
 	for book in library['books']:
 		if args[0] == book['id']:
-			book['finished'] = CURRENT_DATE
+			book['finished'] = date
 			book['status'] = "Done"
 			return library
 	exit(ERR_ID_404_MSG)
@@ -251,8 +268,9 @@ def stats(args, library):
 def help_print(args, library):
 	print("How to use page")
 	print("Commands:\n")
-	print("  page add <id> <isbn>")
-	print("    Adds a book to the library with provided ID, can find book info with isbn\n")
+	print("  page add <id> (<isbn>)")
+	print("    Adds a book to the library with provided ID")
+	print("    Optioanl to find book info with isbn\n")
 	print("  page remove <id>")
 	print("    Removes a book from the library with provided ID\n")
 	print("  page list")
@@ -260,8 +278,9 @@ def help_print(args, library):
 	print("  page log <id> <page_number> (<date>)")
 	print("    Logs the current page of book with provided ID.")
 	print("    Optional to add a date, default is current date\n")
-	print("  page finish <id>")
-	print("    Marks the book with provided ID as finished\n")
+	print("  page finish <id> (<date>)")
+	print("    Marks the book with provided ID as finished")
+	print("    Optional to add a date, default is current date\n")
 	print("  page info <id>")
 	print("    Prints stored information about the book with provided ID\n")
 	print("  page modify <id> <key>=<value> (<key>=<value> ...)")
