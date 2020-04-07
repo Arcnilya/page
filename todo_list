@@ -10,7 +10,7 @@
 - Feature: prompt for overwriting log (done)
 - Feature: add, input book manually when no ISBN (done)
 - Feature: finish, optional date parameter (done)
-- Feature: make sure add function is working offline
+- Feature: make sure add function is working offline (done)
 - Restructure the library
   - Split logging from library into separate files
 - Testing: page modify function

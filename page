@@ -67,6 +67,14 @@ def verify_isbn(isbn):
 	else:
 		return False
 
+def manual_input(book):
+	book['title'] = str(input("Title: "))
+	book['authors'] = list(str(input("Authors: ")).split(', '))
+	book['publisher'] = str(input("Publisher: "))
+	book['year'] = str(input("Year: "))
+	book['language'] = str(input("Language: "))
+	return book
+
 # ========== Functions ===========
 def add_book(args, library):
 	if DEBUG_MODE:
@@ -93,24 +101,31 @@ def add_book(args, library):
 		isbn = args[1]
 
 	if verify_isbn(isbn):
-		book_item = isbnlib.meta(isbn)
-		#print(json.dumps(book_item))
-		book['title'] = book_item['Title']
-		book['authors'] = book_item['Authors']
-		book['publisher'] = book_item['Publisher']
-		book['year'] = book_item['Year']
-		book['language'] = book_item['Language']
+		# Valid ISBN
+		try:
+			# Fetch info online
+			book_item = isbnlib.meta(isbn)
+			book['title'] = book_item['Title']
+			book['authors'] = book_item['Authors']
+			book['publisher'] = book_item['Publisher']
+			book['year'] = book_item['Year']
+			book['language'] = book_item['Language']
+		except Exception:
+			# Offline
+			print("Could not connect in order to find ISBN")
+			if str(input("Add book manually? (Y/N) ")).lower() in ["yes", "y"]:
+				book = manual_input(book)
+			else:
+				return library
 	else:
+		# Not a valid ISBN 
 		print("No ISBN found")
 		if str(input("Add book manually? (Y/N) ")).lower() in ["yes", "y"]:
-			book['title'] = str(input("Title: "))
-			book['authors'] = list(str(input("Authors: ")).split(', '))
-			book['publisher'] = str(input("Publisher: "))
-			book['year'] = str(input("Year: "))
-			book['language'] = str(input("Language: "))
+			book = manual_input(book)
 		else:
 			return library
 
+	# Additional default book info
 	book['id'] = args[0]
 	book['isbn'] = isbn
 	book['status'] = "New"
@@ -118,7 +133,7 @@ def add_book(args, library):
 	book['finished'] = None
 	book['log'] = {}
 	library['books'].append(book)
-	del book	
+	del book
 	return library
 
 def remove_book(args, library):
