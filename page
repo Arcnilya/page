@@ -48,7 +48,7 @@ def id_exists(book_id, library):
 	return False
 
 def check_date(date):
-	if len(date) == 6:
+	if len(date) == 6 and date.isdigit():
 		if int(date[:2]) > 0 and int(date[:2]) < 32:
 			if int(date[2:-2]) > 0 and int(date[2:-2]) < 13:
 				return date
@@ -175,14 +175,14 @@ def log_book(args, library):
 
 def finish_book(args, library):
 	if DEBUG_MODE:
-		print("finish_book({})".format(args)) # args[id]
+		print("finish_book({})".format(args)) # args[id, (date)] 
 
 	if len(args) < 1:
 		exit(ERR_ARGLEN_MSG + " <id> (<date>)")
 
 	date = CURRENT_DATE
-	if len(args) > 2: # if date provided
-		date = check_date(args[2])
+	if len(args) > 1: # if date provided
+		date = check_date(args[1])
 
 	for book in library['books']:
 		if args[0] == book['id']:
@@ -205,10 +205,14 @@ def modify_book(args, library):
 				key = str(pair.split('=')[0])
 				value = str(pair.split('=')[1])
 				if key == 'id':
+					# Check if ID already exist
 					if id_exists(value, library):
 						exit(ERR_ID_NOT_404_MSG)
 					else:
 						book['id'] = value
+				elif key == 'started' or key == 'finished':
+						# Needs to be a date
+						book[key] = check_date(value)
 				else:
 					book[key] = value
 	return library

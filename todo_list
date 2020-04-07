@@ -9,8 +9,12 @@
 - Function: help command listing available commands (done)
 - Feature: prompt for overwriting log (done)
 - Feature: add, input book manually when no ISBN (done)
-- Feature: finish, optional date parameter
-- Debugging: page modify function
+- Feature: finish, optional date parameter (done)
+- Feature: make sure add function is working offline
+- Restructure the library
+  - Split logging from library into separate files
+- Testing: page modify function
+- Function: 'whatis' to query isbn without adding the book
 - Function: stats command
   - Feature: for book
   - Feature: for month
