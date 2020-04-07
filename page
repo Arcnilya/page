@@ -16,6 +16,9 @@ CURRENT_DATE = "{}{}{}".format(
     str(today.year)[2:])
 
 temp_name = "test.json"
+library_file = "library.json"
+pagelog_file = "pagelog.json"
+
 DEBUG_MODE = True
 MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", 
           "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
@@ -32,13 +35,13 @@ ERR_DATE_MSG = "Date must be in format ddmmyy, ex 260320"
 #ERR_NOKEY_MSG = "Command not found: {}".format(sys.argv[1])
 
 # ========== Read/Write ==========
-def read_json():
-  with open(temp_name, 'r') as f:
+def read_json(file_name):
+  with open(file_name, 'r') as f:
     return json.load(f)
 
-def write_json(library):
-  with open(temp_name, 'w') as f:
-    json.dump(library, f, indent=4)
+def write_json(data, file_name):
+  with open(file_name, 'w') as f:
+    json.dump(data, f, indent=4)
 
 # =========== Utils ==============
 def id_exists(book_id, library):
@@ -333,12 +336,12 @@ def main():
 		exit(ERR_NOKEY_MSG)
 
 	try:
-		library = read_json()
+		library = read_json(library_file)
 	except:
 		print(INFO_LIBRARY_404_MSG)
 
 	library = commands[sys.argv[1]](sys.argv[2:], library)
-	write_json(library)
+	write_json(library, library_file)
 
 if __name__ == "__main__":
 	main()
